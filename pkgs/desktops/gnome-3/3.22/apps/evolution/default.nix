@@ -8,6 +8,17 @@
 
 let
   majVer = gnome3.version;
+
+  buildInputs_ = [ gtk3 glib intltool itstool libxml2 libtool
+                  gdk_pixbuf gnome3.defaultIconTheme librsvg db icu
+                  gnome3.evolution_data_server libsecret libical gcr
+                  webkitgtk shared_mime_info gnome3.gnome_desktop gtkspell3
+                  libcanberra_gtk3 bogofilter gnome3.libgdata sqlite
+                  gst_all_1.gstreamer gst_all_1.gst-plugins-base p11_kit
+                  nss nspr libnotify procps highlight gnome3.libgweather
+                  gnome3.gsettings_desktop_schemas dconf
+                  gnome3.libgnome_keyring gnome3.glib_networking ];
+
   unwrapped = stdenv.mkDerivation rec {
   inherit (import ./src.nix fetchurl) name src;
 
@@ -18,15 +29,7 @@ let
 
   propagatedBuildInputs = [ gnome3.gtkhtml ];
 
-  buildInputs = [ gtk3 glib intltool itstool libxml2 libtool
-                  gdk_pixbuf gnome3.defaultIconTheme librsvg db icu
-                  gnome3.evolution_data_server libsecret libical gcr
-                  webkitgtk shared_mime_info gnome3.gnome_desktop gtkspell3
-                  libcanberra_gtk3 bogofilter gnome3.libgdata sqlite
-                  gst_all_1.gstreamer gst_all_1.gst-plugins-base p11_kit
-                  nss nspr libnotify procps highlight gnome3.libgweather
-                  gnome3.gsettings_desktop_schemas dconf
-                  gnome3.libgnome_keyring gnome3.glib_networking ];
+  buildInputs = buildInputs_;
 
   nativeBuildInputs = [ pkgconfig wrapGAppsHook ];
 
@@ -67,7 +70,7 @@ let
 
 in if plugins == [] then unwrapped
     else import ./wrapper.nix {
-      inherit stdenv makeWrapper symlinkJoin plugins;
+      inherit stdenv makeWrapper symlinkJoin plugins gnome3 buildInputs_;
       evolution = unwrapped;
       version = gnome3.version;
     }
