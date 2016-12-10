@@ -394,6 +394,8 @@ let
 
   gnome-packagekit = callPackage ./misc/gnome-packagekit { };
 
+  evolution-rss = callPackage ./misc/evolution-rss { };
+
     };
   in self; # pkgsFun
 
