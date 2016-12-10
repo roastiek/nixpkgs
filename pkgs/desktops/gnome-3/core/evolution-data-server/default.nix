@@ -1,7 +1,8 @@
 { fetchurl, stdenv, pkgconfig, gnome3, python, dconf
 , intltool, libsoup, libxml2, libsecret, icu, sqlite
 , p11_kit, db, nspr, nss, libical, gperf, makeWrapper, valaSupport ? true,
-vala_0_32, cmake, kerberos, openldap, webkitgtk, libaccounts-glib }:
+vala_0_32, cmake, kerberos, openldap, webkitgtk, libaccounts-glib
+, ids_patch ? false }:
 
 stdenv.mkDerivation rec {
   inherit (import ./src.nix fetchurl) name src;
@@ -22,6 +23,8 @@ stdenv.mkDerivation rec {
                      "-DCMAKE_SKIP_BUILD_RPATH=OFF" ];
 
   enableParallelBuilding = true;
+
+  patches = if ids_patch then [ ./evolution-data-server-persistent-folder-ids.patch ] else null;
 
   preFixup = ''
     for f in $(find $out/libexec/ -type f -executable); do

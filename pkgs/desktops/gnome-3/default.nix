@@ -31,7 +31,7 @@ let
     gucharmap nautilus totem vino yelp gnome-bluetooth
     gnome-calculator gnome-contacts gnome-font-viewer gnome-screenshot
     gnome-system-log gnome-system-monitor
-    gnome_terminal gnome-user-docs evolution file-roller gedit
+    gnome_terminal gnome-user-docs evolution-with-plugins file-roller gedit
     gnome-clocks gnome-music gnome-tweak-tool gnome-photos
     nautilus-sendto dconf-editor vinagre gnome-weather gnome-logs
     gnome-maps gnome-characters gnome-calendar accerciser gnome-nettool
@@ -84,6 +84,8 @@ let
   evince = callPackage ./core/evince { }; # ToDo: dbus would prevent compilation, enable tests
 
   evolution_data_server = callPackage ./core/evolution-data-server { };
+
+  evolution_data_server_ids = callPackage ./core/evolution-data-server { ids_patch = true; };
 
   gconf = callPackage ./core/gconf { };
 
@@ -262,7 +264,13 @@ let
 
   cheese = callPackage ./apps/cheese { };
 
-  evolution = callPackage ./apps/evolution { };
+  evolution = callPackage ./apps/evolution {
+    plugins = [ ];
+  };
+
+  evolution-with-plugins = callPackage ./apps/evolution {
+    plugins = [ evolution-rss ];
+  };
 
   file-roller = callPackage ./apps/file-roller { };
 

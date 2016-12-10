@@ -3,21 +3,12 @@
 , wrapGAppsHook, itstool, shared_mime_info, libical, db, gcr, sqlite
 , gnome3, librsvg, gdk_pixbuf, libsecret, nss, nspr, icu, libtool
 , libcanberra_gtk3, bogofilter, gst_all_1, procps, p11_kit, openldap
+, plugins, symlinkJoin, makeWrapper, file
 , cmake}:
 
 let
   majVer = gnome3.version;
-in stdenv.mkDerivation rec {
-  inherit (import ./src.nix fetchurl) name src;
-
-  doCheck = true;
-
-  propagatedUserEnvPkgs = [ gnome3.gnome_themes_standard
-                            gnome3.evolution_data_server ];
-
-  propagatedBuildInputs = [ gnome3.gtkhtml ];
-
-  buildInputs = [ gtk3 glib intltool itstool libxml2 libtool
+  buildInputs_ = [ gtk3 glib intltool itstool libxml2 libtool
                   gdk_pixbuf gnome3.defaultIconTheme librsvg db icu
                   gnome3.evolution_data_server libsecret libical gcr
                   webkitgtk shared_mime_info gnome3.gnome_desktop gtkspell3
@@ -28,12 +19,32 @@ in stdenv.mkDerivation rec {
                   gnome3.libgnome_keyring gnome3.glib_networking openldap
                   cmake
                 ];
+  unwrapped = stdenv.mkDerivation rec {
+  inherit (import ./src.nix fetchurl) name src;
+
+  doCheck = true;
+
+  propagatedUserEnvPkgs = [ gnome3.gnome_themes_standard
+                            gnome3.evolution_data_server ];
+
+  propagatedBuildInputs = [ gnome3.gtkhtml ];
+
+  buildInputs = buildInputs_;
 
   nativeBuildInputs = [ pkgconfig wrapGAppsHook ];
 
 
   configureFlags = [ "--disable-pst-import" "--disable-autoar"
                      "--disable-libcryptui" "--with-openldap"];
+
+  patches = [
+    ./reloc-support.patch
+    ./evolution-composite-cell-style.patch
+    ./evolution-persistent-folder-ids.patch
+    ./evolution-repeat-cursod-uid-restore.patch
+    ./evolution-single-key-mark-read.patch
+    ./evolution-mark-read-and-next-unread.patch
+  ];
 
   cmakeFlags = [ "-DENABLE_AUTOAR=OFF" "-DENABLE_LIBCRYPTUI=OFF"
                  "-DENABLE_YTNEF=OFF" "-DENABLE_PST_IMPORT=OFF"
@@ -52,4 +63,11 @@ in stdenv.mkDerivation rec {
     license = licenses.lgpl2Plus;
     platforms = platforms.linux;
   };
-}
+};
+
+in if plugins == [] then unwrapped
+    else import ./wrapper.nix {
+      inherit stdenv makeWrapper symlinkJoin plugins gnome3 buildInputs_;
+      evolution = unwrapped;
+      version = gnome3.version;
+    }
