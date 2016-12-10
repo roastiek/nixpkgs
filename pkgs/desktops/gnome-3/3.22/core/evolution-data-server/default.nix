@@ -17,6 +17,7 @@ stdenv.mkDerivation rec {
                    ++ stdenv.lib.optional valaSupport "--enable-vala-bindings";
 
   enableParallelBuilding = true;
+  patches = [ ./evolution-data-server-persistent-folder-ids.patch ];
 
   preFixup = ''
     for f in "$out/libexec/"*; do
