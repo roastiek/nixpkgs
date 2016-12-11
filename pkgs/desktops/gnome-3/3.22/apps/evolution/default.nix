@@ -3,7 +3,7 @@
 , wrapGAppsHook, itstool, shared_mime_info, libical, db, gcr, sqlite
 , gnome3, librsvg, gdk_pixbuf, libsecret, nss, nspr, icu, libtool
 , libcanberra_gtk3, bogofilter, gst_all_1, procps, p11_kit, dconf
-, plugins, symlinkJoin, makeWrapper
+, plugins, symlinkJoin, makeWrapper, file
 }:
 
 let
@@ -17,7 +17,7 @@ let
                   gst_all_1.gstreamer gst_all_1.gst-plugins-base p11_kit
                   nss nspr libnotify procps highlight gnome3.libgweather
                   gnome3.gsettings_desktop_schemas dconf
-                  gnome3.libgnome_keyring gnome3.glib_networking ];
+                  gnome3.libgnome_keyring gnome3.glib_networking file ];
 
   unwrapped = stdenv.mkDerivation rec {
   inherit (import ./src.nix fetchurl) name src;
@@ -33,11 +33,11 @@ let
 
   nativeBuildInputs = [ pkgconfig wrapGAppsHook ];
 
-  configureFlags = [ "--disable-spamassassin" "--disable-pst-import" "--disable-autoar"
+  configureFlags = [ "--with-spamassassin=no" "--disable-pst-import" "--disable-autoar"
                      "--disable-libcryptui" ];
 
   patches = [
-    ./evolution-plugin-path.patch
+    ./reloc-support.patch
     ./evolution-composite-cell-style.patch
     ./evolution-persistent-folder-ids.patch
     ./evolution-repeat-cursod-uid-restore.patch
@@ -48,14 +48,6 @@ let
   NIX_CFLAGS_COMPILE = "-I${nss.dev}/include/nss -I${glib.dev}/include/gio-unix-2.0";
 
   enableParallelBuilding = true;
-
-  preFixup = ''
-    for f in $out/bin/* $out/libexec/*; do
-      wrapProgram "$f" \
-        --set GDK_PIXBUF_MODULE_FILE "$GDK_PIXBUF_MODULE_FILE" \
-        --prefix XDG_DATA_DIRS : "${gnome3.gnome_themes_standard}/share:$XDG_ICON_DIRS:$GSETTINGS_SCHEMAS_PATH"
-    done
-  '';
 
   requiredSystemFeatures = [ "big-parallel" ];
 
