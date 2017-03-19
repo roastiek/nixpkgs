@@ -1,0 +1,24 @@
+diff -ru aspell-0.60.6.1.orig/lib/config-c.cpp aspell-0.60.6.1/lib/config-c.cpp
+--- aspell-0.60.6.1.orig/lib/config-c.cpp	2017-03-19 21:08:10.500863734 +0100
++++ aspell-0.60.6.1/lib/config-c.cpp	2017-03-19 22:11:30.469352124 +0100
+@@ -6,6 +6,9 @@
+  * LGPL license along with this library if you did not you can find it
+  * at http://www.gnu.org/.                                              */
+ 
++
++#include <memory>
++
+ #include "config.hpp"
+ #include "error.hpp"
+ #include "posib_err.hpp"
+@@ -47,7 +50,9 @@
+ 
+ extern "C" Config * new_aspell_config()
+ {
+-  return new_config();
++  std::auto_ptr<Config> config(new_config());
++  config->read_in_settings();
++  return config.release();
+ }
+ 
+ extern "C" void delete_aspell_config(Config * ths)

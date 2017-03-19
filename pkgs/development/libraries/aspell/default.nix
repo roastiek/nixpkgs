@@ -1,4 +1,4 @@
-{stdenv, fetchurl, perl}:
+{stdenv, fetchurl, perl, use-env ? false }:
 
 stdenv.mkDerivation rec {
   name = "aspell-0.60.6.1";
@@ -10,7 +10,9 @@ stdenv.mkDerivation rec {
 
   patchPhase = ''
     patch interfaces/cc/aspell.h < ${./clang.patch}
-  '';
+  '' + ( if use-env then ''
+    patch -p1 < ${./use-env.patch}
+  '' else "");
 
   buildInputs = [ perl ];
 

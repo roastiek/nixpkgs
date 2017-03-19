@@ -6891,6 +6891,8 @@ in
 
   aspell = callPackage ../development/libraries/aspell { };
 
+  aspellUseEnv = callPackage ../development/libraries/aspell { use-env = true; };
+
   aspellDicts = recurseIntoAttrs (callPackages ../development/libraries/aspell/dictionaries.nix {});
 
   attica = callPackage ../development/libraries/attica { };
