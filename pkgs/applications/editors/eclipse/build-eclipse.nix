@@ -1,5 +1,5 @@
 { stdenv, makeDesktopItem, freetype, fontconfig, libX11, libXrender
-, zlib, jdk, glib, gtk, libXtst, gsettings_desktop_schemas, webkitgtk2
+, zlib, jdk, glib, gtk, libXtst, gsettings_desktop_schemas, webkitgtk
 , makeWrapper, ... }:
 
 { name, src ? builtins.getAttr stdenv.system sources, sources ? null, description }:
@@ -20,12 +20,14 @@ stdenv.mkDerivation rec {
   buildInputs = [
     fontconfig freetype glib gsettings_desktop_schemas gtk jdk libX11
     libXrender libXtst makeWrapper zlib
-  ] ++ stdenv.lib.optional (webkitgtk2 != null) webkitgtk2;
+  ] ++ stdenv.lib.optional (webkitgtk != null) webkitgtk;
 
   buildCommand = ''
     # Unpack tarball.
     mkdir -p $out
     tar xfvz $src -C $out
+
+    sed -i 's/url(.\/gtkTSFrame.png)/null/' $out/eclipse/plugins/*ui.themes*/css/e4_default_gtk.css
 
     # Patch binaries.
     interpreter=$(echo ${stdenv.glibc.out}/lib/ld-linux*.so.2)
@@ -41,7 +43,7 @@ stdenv.mkDerivation rec {
 
     makeWrapper $out/eclipse/eclipse $out/bin/eclipse \
       --prefix PATH : ${jdk}/bin \
-      --prefix LD_LIBRARY_PATH : ${stdenv.lib.makeLibraryPath ([ glib gtk libXtst ] ++ stdenv.lib.optional (webkitgtk2 != null) webkitgtk2)} \
+      --prefix LD_LIBRARY_PATH : ${stdenv.lib.makeLibraryPath ([ glib gtk libXtst ] ++ stdenv.lib.optional (webkitgtk != null) webkitgtk)} \
       --prefix XDG_DATA_DIRS : "$GSETTINGS_SCHEMAS_PATH" \
       --add-flags "-configuration \$HOME/.eclipse/''${productId}_$productVersion/configuration"
 

@@ -6047,9 +6047,9 @@ in
 
   sourceFromHead = callPackage ../build-support/source-from-head-fun.nix {};
 
-  ecj = callPackage ../development/eclipse/ecj { };
+  ecj = callPackage ../development/eclipse/ecj { gtk = gtk3; };
 
-  jdtsdk = callPackage ../development/eclipse/jdt-sdk { };
+  jdtsdk = callPackage ../development/eclipse/jdt-sdk { gtk = gtk3; };
 
   jruby = callPackage ../development/interpreters/jruby { };
 
@@ -12816,7 +12816,7 @@ in
 
   eaglemode = callPackage ../applications/misc/eaglemode { };
 
-  eclipses = recurseIntoAttrs (callPackage ../applications/editors/eclipse { });
+  eclipses = recurseIntoAttrs (callPackage ../applications/editors/eclipse { gtk = gtk3; });
 
   ed = callPackage ../applications/editors/ed { };
 
