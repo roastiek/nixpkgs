@@ -10,6 +10,7 @@
 , vlc_npapi
 , libudev
 , kerberos
+, chrome-gnome-shell
 }:
 
 ## configurability of the wrapper itself
@@ -49,6 +50,7 @@ let
      );
   nativeMessagingHosts =
      ([ ]
+      ++ lib.optional (cfg.enableGnomeExtensions or false) chrome-gnome-shell
      );
   libs = (if ffmpegSupport then [ ffmpeg ] else with gst_all; [ gstreamer gst-plugins-base ])
          ++ lib.optional gssSupport kerberos
