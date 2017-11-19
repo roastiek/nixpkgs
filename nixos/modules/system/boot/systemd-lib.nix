@@ -186,7 +186,7 @@ rec {
         ln -s rescue.target $out/kbrequest.target
 
         mkdir -p $out/getty.target.wants/
-        ln -s ../autovt@tty1.service $out/getty.target.wants/
+        ln -s ../autovt@tty7.service $out/getty.target.wants/
 
         ln -s ../local-fs.target ../remote-fs.target \
         ../nss-lookup.target ../nss-user-lookup.target ../swap.target \
