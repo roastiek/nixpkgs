@@ -1,7 +1,10 @@
-{ lib, ... }:
+{ lib, config, ... }:
 
 with lib;
 
+let
+  cfg = config.boot.loader.efi;
+in
 {
   options.boot.loader.efi = {
 
@@ -13,6 +16,12 @@ with lib;
 
     efiSysMountPoint = mkOption {
       default = "/boot";
+      type = types.str;
+      description = "Where the EFI System Partition is mounted.";
+    };
+
+    extendedBootLoaderMountPoint = mkOption {
+      default = cfg.efiSysMountPoint;
       type = types.str;
       description = "Where the EFI System Partition is mounted.";
     };

@@ -26,7 +26,7 @@ let
 
     inherit (cfg) consoleMode;
 
-    inherit (efi) efiSysMountPoint canTouchEfiVariables;
+    inherit (efi) efiSysMountPoint canTouchEfiVariables extendedBootLoaderMountPoint;
 
     memtest86 = if cfg.memtest86.enable then pkgs.memtest86-efi else "";
   };

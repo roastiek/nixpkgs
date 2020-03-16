@@ -64,7 +64,7 @@ def copy_from_profile(profile, generation, name, dry_run=False):
     store_dir = os.path.basename(os.path.dirname(store_file_path))
     efi_file_path = "/efi/nixos/%s-%s.efi" % (store_dir, suffix)
     if not dry_run:
-        copy_if_not_exists(store_file_path, "@efiSysMountPoint@%s" % (efi_file_path))
+        copy_if_not_exists(store_file_path, "@extendedBootLoaderMountPoint@%s" % (efi_file_path))
     return efi_file_path
 
 def describe_generation(generation_dir):
@@ -96,9 +96,9 @@ def write_entry(profile, generation, machine_id):
     except FileNotFoundError:
         pass
     if profile:
-        entry_file = "@efiSysMountPoint@/loader/entries/nixos-%s-generation-%d.conf" % (profile, generation)
+        entry_file = "@extendedBootLoaderMountPoint@/loader/entries/nixos-%s-generation-%d.conf" % (profile, generation)
     else:
-        entry_file = "@efiSysMountPoint@/loader/entries/nixos-generation-%d.conf" % (generation)
+        entry_file = "@extendedBootLoaderMountPoint@/loader/entries/nixos-generation-%d.conf" % (generation)
     generation_dir = os.readlink(system_dir(profile, generation))
     tmp_path = "%s.tmp" % (entry_file)
     kernel_params = "systemConfig=%s init=%s/init " % (generation_dir, generation_dir)
@@ -138,13 +138,13 @@ def get_generations(profile=None):
     return [ (profile, int(line.split()[0])) for line in gen_lines ][-configurationLimit:]
 
 def remove_old_entries(gens):
-    rex_profile = re.compile("^@efiSysMountPoint@/loader/entries/nixos-(.*)-generation-.*\.conf$")
-    rex_generation = re.compile("^@efiSysMountPoint@/loader/entries/nixos.*-generation-(.*)\.conf$")
+    rex_profile = re.compile("^@extendedBootLoaderMountPoint@/loader/entries/nixos-(.*)-generation-.*\.conf$")
+    rex_generation = re.compile("^@extendedBootLoaderMountPoint@/loader/entries/nixos.*-generation-(.*)\.conf$")
     known_paths = []
     for gen in gens:
         known_paths.append(copy_from_profile(*gen, "kernel", True))
         known_paths.append(copy_from_profile(*gen, "initrd", True))
-    for path in glob.iglob("@efiSysMountPoint@/loader/entries/nixos*-generation-[1-9]*.conf"):
+    for path in glob.iglob("@extendedBootLoaderMountPoint@/loader/entries/nixos*-generation-[1-9]*.conf"):
         try:
             if rex_profile.match(path):
                 prof = rex_profile.sub(r"\1", path)
@@ -155,7 +155,7 @@ def remove_old_entries(gens):
                 os.unlink(path)
         except ValueError:
             pass
-    for path in glob.iglob("@efiSysMountPoint@/efi/nixos/*"):
+    for path in glob.iglob("@extendedBootLoaderMountPoint@/efi/nixos/*"):
         if not path in known_paths and not os.path.isdir(path):
             os.unlink(path)
 
@@ -194,12 +194,12 @@ def main():
             os.unlink("@efiSysMountPoint@/loader/loader.conf")
 
         if "@canTouchEfiVariables@" == "1":
-            subprocess.check_call(["@systemd@/bin/bootctl", "--path=@efiSysMountPoint@", "install"])
+            subprocess.check_call(["@systemd@/bin/bootctl", "--esp-path=@efiSysMountPoint@", "--boot-path=@extendedBootLoaderMountPoint@", "install"])
         else:
-            subprocess.check_call(["@systemd@/bin/bootctl", "--path=@efiSysMountPoint@", "--no-variables", "install"])
+            subprocess.check_call(["@systemd@/bin/bootctl", "--esp-path=@efiSysMountPoint@", "--boot-path=@extendedBootLoaderMountPoint@", "--no-variables", "install"])
 
-    mkdir_p("@efiSysMountPoint@/efi/nixos")
-    mkdir_p("@efiSysMountPoint@/loader/entries")
+    mkdir_p("@extendedBootLoaderMountPoint@/efi/nixos")
+    mkdir_p("@extendedBootLoaderMountPoint@/loader/entries")
 
     gens = get_generations()
     for profile in get_profiles():
@@ -235,6 +235,10 @@ def main():
     rc = libc.syncfs(os.open("@efiSysMountPoint@", os.O_RDONLY))
     if rc != 0:
         print("could not sync @efiSysMountPoint@: {}".format(os.strerror(rc)), file=sys.stderr)
+
+    rc = libc.syncfs(os.open("@extendedBootLoaderMountPoint@", os.O_RDONLY))
+    if rc != 0:
+        print("could not sync @extendedBootLoaderMountPoint@: {}".format(os.strerror(rc)), file=sys.stderr)
 
 if __name__ == '__main__':
     main()
