@@ -52,6 +52,7 @@
 stdenv.mkDerivation (
   finalAttrs:
   let
+    inherit (stdenv.hostPlatform) system;
 
     # Vscode and variants allow for users to download and use extensions
     # which often include the usage of pre-built binaries.
@@ -275,7 +276,11 @@ stdenv.mkDerivation (
         --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations}}"
         --add-flags ${lib.escapeShellArg commandLineArgs}
       )
-    '';
+    '' + ( lib.optionalString (system == "i686-linux" || system == "x86_64-linux") ''
+      gappsWrapperArgs+=(
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ systemd fontconfig ]}
+      )
+    '');
 
     # See https://github.com/NixOS/nixpkgs/issues/49643#issuecomment-873853897
     # linux only because of https://github.com/NixOS/nixpkgs/issues/138729
