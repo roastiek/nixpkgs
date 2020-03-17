@@ -101,9 +101,11 @@ let
     preFixup = ''
       gappsWrapperArgs+=(
         # Add gio to PATH so that moving files to the trash works when not using a desktop environment
-        --prefix PATH : ${glib.bin}/bin
-      )
-    '';
+        --prefix PATH : ${glib.bin}/bin)
+      '' + ( lib.optionalString (system == "i686-linux" || system == "x86_64-linux") ''
+      gappsWrapperArgs+=(
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ systemd fontconfig ]})
+      '');
 
     inherit meta;
   };
