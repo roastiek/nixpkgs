@@ -107,9 +107,11 @@ let
     preFixup = ''
       gappsWrapperArgs+=(
         # Add gio to PATH so that moving files to the trash works when not using a desktop environment
-        --prefix PATH : ${glib.bin}/bin
-      )
-    '';
+        --prefix PATH : ${glib.bin}/bin)
+      '' + ( lib.optionalString (system == "i686-linux" || system == "x86_64-linux") ''
+      gappsWrapperArgs+=(
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ systemd fontconfig ]})
+      '');
 
     # See https://github.com/NixOS/nixpkgs/issues/49643#issuecomment-873853897
     # linux only because of https://github.com/NixOS/nixpkgs/issues/138729
