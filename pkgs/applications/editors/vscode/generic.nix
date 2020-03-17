@@ -111,7 +111,11 @@ let
         --prefix PATH : ${glib.bin}/bin
         --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--enable-features=UseOzonePlatform --ozone-platform=wayland}}"
       )
-    '';
+      '' + ( lib.optionalString (system == "i686-linux" || system == "x86_64-linux")
+      '' gappsWrapperArgs+=(
+        --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ systemd fontconfig ]}
+      )
+      '');
 
     # See https://github.com/NixOS/nixpkgs/issues/49643#issuecomment-873853897
     # linux only because of https://github.com/NixOS/nixpkgs/issues/138729
