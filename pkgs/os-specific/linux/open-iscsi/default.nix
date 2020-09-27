@@ -1,4 +1,4 @@
-{ stdenv, fetchFromGitHub, automake, autoconf, libtool, gettext
+{ stdenv, fetchFromGitHub, automake, autoconf, libtool, gettext, bash
 , utillinux, openisns, openssl, kmod, perl, systemd, pkgconf
 }:
 
@@ -21,11 +21,18 @@ stdenv.mkDerivation rec {
   NIX_LDFLAGS = "-lkmod -lsystemd";
   NIX_CFLAGS_COMPILE = "-DUSE_KMOD";
 
+  postPatch = ''
+    for u in etc/systemd/*; do
+      substituteInPlace $u --replace /sbin $out/bin --replace /usr/bin/sh ${bash}/bin/sh
+    done
+  '';
+
   preConfigure = ''
     sed -i 's|/usr|/|' Makefile
   '';
 
   postInstall = ''
+    make install_systemd
     cp usr/iscsistart $out/sbin/
     $out/sbin/iscsistart -v
   '';
