@@ -61,9 +61,11 @@ let
   #
   # buildFHSEnv allows for users to use the existing vscode
   # extension tooling without significant pain.
-  fhs = { additionalPkgs ? pkgs: [ ] }: buildFHSEnv {
+  fhs = { additionalPkgs ? pkgs: [], profile ? ""  }: buildFHSEnv {
     # also determines the name of the wrapped command
     name = executableName;
+
+    inherit profile;
 
     # additional libraries which are commonly needed for extensions
     targetPkgs = pkgs: (with pkgs; [
@@ -117,7 +119,7 @@ in
    passthru = {
     inherit executableName longName tests updateScript;
     fhs = fhs { };
-    fhsWithPackages = f: fhs { additionalPkgs = f; };
+    fhsWithPackages = args: fhs args;
   } // lib.optionalAttrs (vscodeServer != null) {
     inherit rev vscodeServer;
   };
