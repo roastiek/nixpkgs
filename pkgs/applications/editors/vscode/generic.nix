@@ -66,10 +66,13 @@ stdenv.mkDerivation (
     fhs =
       {
         additionalPkgs ? pkgs: [ ],
+        profile ? "",
       }:
       buildFHSEnv {
         # also determines the name of the wrapped command
         name = executableName;
+
+        inherit profile;
 
         # additional libraries which are commonly needed for extensions
         targetPkgs =
@@ -139,7 +142,7 @@ stdenv.mkDerivation (
           updateScript
           ;
         fhs = fhs { };
-        fhsWithPackages = f: fhs { additionalPkgs = f; };
+        fhsWithPackages = args: fhs args;
       }
       // lib.optionalAttrs (vscodeServer != null) {
         inherit rev vscodeServer;
