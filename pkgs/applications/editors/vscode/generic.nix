@@ -94,12 +94,14 @@ stdenv.mkDerivation (
     fhs =
       {
         additionalPkgs ? pkgs: [ ],
+        profile ? "",
       }:
       let
         defaultArgs = {
           # also determines the name of the wrapped command
           pname = executableName;
           inherit version;
+          inherit profile;
 
           # additional libraries which are commonly needed for extensions
           targetPkgs =
@@ -195,7 +197,7 @@ stdenv.mkDerivation (
         vscodeVersion
         ;
       fhs = fhs { };
-      fhsWithPackages = f: fhs { additionalPkgs = f; };
+      fhsWithPackages = args: fhs args;
     }
     // lib.optionalAttrs (vscodeServer != null) {
       inherit rev vscodeServer;
