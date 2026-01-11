@@ -117,6 +117,8 @@ stdenv.mkDerivation (finalAttrs: {
 
     patchShebangs --host \
       src/powerprofilesctl
+
+    substituteInPlace data/power-profiles-daemon.service.in --replace "tlp.service " ""
   '';
 
   postFixup = ''
